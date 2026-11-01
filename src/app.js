@@ -93,6 +93,7 @@ let meshes = [] // 모든 표시 메시
 const bySid = new Map() // 구조 id → [mesh]
 const pickables = []
 let selected = null
+let activePath = null
 let figureFocus = null
 let mode = 'explore'
 const overlayCleanups = []
@@ -225,11 +226,15 @@ function applyVisibility() {
   applyLabelVisibility()
 }
 // 이름표: 자기 레이어가 꺼지면 숨기고, 교재 그림 모드에서는 그림에 없는 구조의 이름표를 숨긴다
+// 교감신경 도식 이름표는 처음엔 숨기고, 도식 구조를 골랐거나 그 구조가 든 경로를 볼 때만 보인다
+const isSym = (sid) => (bySid.get(sid) ?? []).some((m) => m.userData.layer === 'sympathetic')
 function applyLabelVisibility() {
   const inFig = figureFocus ? new Set(figureFocus.structures.flatMap((x) => [x, ...stand(x), ...membersOf(x)])) : null
+  const symOn = !!inFig || (selected && isSym(selected)) || !!activePath?.steps.some((s) => s.s && isSym(s.s))
   for (const o of labelsGroup.children) {
     const { layer, sid } = o.userData ?? {}
     let v = !(layer && hiddenLayers.has(layer))
+    if (v && layer === 'sympathetic' && !symOn) v = false
     if (v && inFig && sid && !inFig.has(sid)) v = false
     if (v && inFig && !sid && layer) v = false
     o.visible = v
@@ -281,6 +286,7 @@ function paint() {
 }
 function select(sid, { fly = false } = {}) {
   selected = sid && R.structures[sid] ? sid : null
+  applyLabelVisibility()
   paint()
   renderInfo(selected)
   if (fly && selected) flyTo(meshesFor(selected))
@@ -555,6 +561,8 @@ function showPath(id) {
   clearFlow()
   const p = R.pathways.find((x) => x.id === id)
   if (!p) return
+  activePath = p
+  applyLabelVisibility()
   document.querySelectorAll('.path-row').forEach((b) => b.classList.toggle('active', b.dataset.path === id))
   const pts = [], stepAt = []
   p.steps.forEach((s, i) => { const a = anchorOf(s); if (a) { pts.push(a); stepAt.push(i) } })
@@ -590,6 +598,8 @@ function showPath(id) {
 function clearFlow() {
   for (const c of [...flowGroup.children]) { c.geometry.dispose(); c.material.dispose(); flowGroup.remove(c) }
   flow = null
+  activePath = null
+  applyLabelVisibility()
 }
 function tickFlow(dt) {
   if (!flow) return

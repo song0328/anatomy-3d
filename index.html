@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>인체 해부 3D</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+  </script>
+</head>
+<body>
+  <main id="viewport"></main>
+  <div id="loading" class="loading">불러오는 중…</div>
+
+  <header class="top">
+    <div class="brand">
+      <p class="eyebrow">ANATOMY · VMRA · 신경해부 실습책</p>
+      <h1>인체 해부 3D</h1>
+    </div>
+    <nav id="regions" class="regions" aria-label="부위"></nav>
+    <div class="search" role="search">
+      <input id="search" type="search" placeholder="구조 찾기 · 정중신경, 중심앞이랑, CN5…" autocomplete="off" aria-label="구조 찾기">
+      <kbd>/</kbd>
+      <ul id="results" hidden></ul>
+    </div>
+  </header>
+
+  <nav class="views" aria-label="시점">
+    <button id="panelsToggle" title="양쪽 패널 숨기기/보이기">패널</button>
+    <button data-fit>전체</button>
+    <button data-view="front">앞</button>
+    <button data-view="back">뒤</button>
+    <button data-view="left">왼쪽</button>
+    <button data-view="right">오른쪽</button>
+    <button data-view="top">위</button>
+    <button data-view="bottom">아래</button>
+  </nav>
+
+  <aside class="panel">
+    <button id="panelToggle" class="panel-handle" aria-label="패널 접기">≡</button>
+    <div class="tabs">
+      <button data-mode="explore" class="active">탐색</button>
+      <button data-mode="figure">교재 그림</button>
+      <button data-mode="path">경로</button>
+      <button data-mode="quiz">퀴즈</button>
+      <button data-mode="section">단면</button>
+    </div>
+    <section data-pane="explore">
+      <div id="layers"></div>
+      <p class="hint">구조를 누르면 교재 기준 설명이 나와요. 신경·혈관 관계 칩을 누르면 그 구조로 이동해요.</p>
+    </section>
+    <section data-pane="figure" hidden>
+      <div id="figDetail"></div>
+      <div id="figList" class="fig-list"></div>
+    </section>
+    <section data-pane="path" hidden>
+      <div id="pathDetail"></div>
+      <div id="pathList" class="fig-list"></div>
+    </section>
+    <section data-pane="quiz" hidden>
+      <div id="quizBox"></div>
+    </section>
+    <section data-pane="section" hidden>
+      <label class="row">축
+        <select id="clipAxis"><option value="y">가로(위→아래)</option><option value="z">관상(앞→뒤)</option><option value="x">시상(왼→오)</option></select>
+      </label>
+      <input id="clipRange" type="range" min="0" max="1" step="0.002" value="1" aria-label="자르는 위치">
+      <button class="ghost" id="clipClear">자르기 해제</button>
+      <div id="sectionDetail"></div>
+      <div id="sectionList" class="fig-list"></div>
+    </section>
+  </aside>
+
+  <section id="info" class="info" hidden></section>
+  <div id="tip" class="tip" hidden></div>
+  <div id="toast" class="toast" hidden></div>
+
+  <footer class="foot">
+    <p>3D: BodyParts3D (CC BY-SA 2.1 JP) · Z-Anatomy (CC BY-SA 4.0). 설명은 수업 교재 기준이에요. <button id="aboutBtn" class="link">출처·주의</button></p>
+  </footer>
+
+  <section id="book" class="book-win" hidden aria-label="교재 그림">
+    <header class="book-head" id="bookHead">
+      <b id="bookTitle"></b>
+      <div class="book-tools">
+        <button data-bk="fig" title="그림만">그림</button>
+        <button data-bk="page" title="쪽 전체">쪽</button>
+        <button data-bk="out" title="축소">−</button>
+        <button data-bk="in" title="확대">+</button>
+        <button data-bk="fit" title="창에 맞춤">맞춤</button>
+        <button data-bk="close" title="닫기 (Esc)">×</button>
+      </div>
+    </header>
+    <div class="book-body" id="bookBody">
+      <div class="book-canvas" id="bookCanvas"><img id="bookImg" alt="교재 그림" draggable="false"><div class="book-mark" id="bookMark" hidden></div></div>
+    </div>
+    <div class="book-hint">휠: 확대 · 끌기: 이동 · 두 번 클릭: 맞춤 · 제목줄: 창 이동 · 모서리: 크기</div>
+    <div class="book-resize" id="bookResize" title="크기 조절"></div>
+  </section>
+  <dialog id="about">
+    <div id="aboutBody"></div>
+    <button id="aboutClose" class="primary">닫기</button>
+  </dialog>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
